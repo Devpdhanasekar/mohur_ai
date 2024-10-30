@@ -9,3 +9,4 @@ tavily-python
 pymongo
 python-dotenv
 anthropic
+Gunicorn
