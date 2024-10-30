@@ -1,0 +1,11 @@
+Flask
+flask-cors
+requests
+beautifulsoup4
+openai
+geopy
+Werkzeug
+tavily-python
+pymongo
+python-dotenv
+anthropic
