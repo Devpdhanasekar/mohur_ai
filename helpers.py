@@ -556,11 +556,14 @@ def getInvestmentData():
 import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
-
 def get_all_endpoints_with_base(url):
-    # Send a request to the base URL
-    response = requests.get(url)
-    response.raise_for_status()  # Ensure we notice bad responses
+    try:
+        # Send a request to the base URL
+        response = requests.get(url, verify=False)
+        response.raise_for_status()  # Ensure we catch HTTP errors
+    except requests.RequestException as e:
+        print(f"An error occurred: {e}")
+        return set()  # Return an empty set in case of error
 
     # Parse the HTML content
     soup = BeautifulSoup(response.text, 'html.parser')
