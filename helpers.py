@@ -355,7 +355,7 @@ def update_founder_data(payload, content_key):
                     return {"status": "error", "message": "Failed to fetch team size"}
 
             # For equity_or_debt
-            elif context == "equity_or_debt":
+            elif context == "equity_debt_fund_category":
                 prompt = f"""
                     Is {name} organisation focused on equity or debt in the investment point of view?
                     The objective is to return 'Equity' or 'Debt' based on their focus.
