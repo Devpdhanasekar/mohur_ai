@@ -46,7 +46,7 @@ def scrapDataFromWeb(url_data):
         finalResult = json.loads(finalResult)
 
         data = {
-            'fund_name': url_data["url"]["title"],
+            'fund_name': finalResult.get("Fund Name", url_data["url"]["title"]),
             'brief_description': finalResult.get("Brief Description", ""),
             'hq_location': finalResult.get("HQ Location", ""),
             'investor_type': url_data["url"]["type"] if "type" in url_data['url'] else "",
