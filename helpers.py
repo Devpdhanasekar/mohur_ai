@@ -49,7 +49,7 @@ def scrapDataFromWeb(url_data):
             'fund_name': finalResult.get("Fund Name", url_data["url"]["title"]),
             'brief_description': finalResult.get("Brief Description", ""),
             'hq_location': finalResult.get("HQ Location", ""),
-            'investor_type': url_data["url"]["type"] if "type" in url_data['url'] else "",
+            'investor_type': finalResult.get("Investor Type",url_data["url"]["type"] if "type" in url_data['url'] else ""),
             'equity_debt_fund_category': finalResult.get("Equity / Debt (Fund Category)", ""),
             'stages_of_entry_investment': finalResult.get("Stages of Entry/ Investment", ""),
             'sectors_of_investment': finalResult.get("Sectors of Investment", ""),
