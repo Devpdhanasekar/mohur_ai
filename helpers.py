@@ -558,12 +558,20 @@ from bs4 import BeautifulSoup
 from urllib.parse import urljoin
 def get_all_endpoints_with_base(url):
     try:
-        # Send a request to the base URL
+        # Try to send a request to the base URL with verify=False
         response = requests.get(url, verify=False)
         response.raise_for_status()  # Ensure we catch HTTP errors
     except requests.RequestException as e:
-        print(f"An error occurred: {e}")
-        return set()  # Return an empty set in case of error
+        print(f"An error occurred with verify=False: {e}")
+        print("Retrying with verify=True...")
+        
+        try:
+            # Retry sending the request with verify=True
+            response = requests.get(url, verify=True)
+            response.raise_for_status()  # Ensure we catch HTTP errors
+        except requests.RequestException as e:
+            print(f"An error occurred with verify=True: {e}")
+            return set()  # Return an empty set in case of error
 
     # Parse the HTML content
     soup = BeautifulSoup(response.text, 'html.parser')
@@ -606,6 +614,64 @@ def scrape_text_from_urls(base_url):
         
         # Process with OpenAI
         result = process_with_openai(prompt)
+        start = result.find("[")
+        end = result.find("]")
+        result = result[start:end+1]
+        print("Result:", type(result))
+        
+        # Parse the response
+        try:
+            url_list = json.loads(result.replace("'", '"'))  # Ensure it's in valid JSON format
+        except json.JSONDecodeError:
+            print("Error decoding JSON response:", result)
+            url_list = []
+        
+        print("High-priority URLs:", url_list)
+        
+        # Initialize a list to store all text data
+        all_text_data = []
+
+        # Scrape data from high-priority URLs
+        for url in url_list:
+            print(f"Fetching data from {url}...")
+            page_content = fetch_page_content(url)
+            if page_content:
+                soup = BeautifulSoup(page_content, 'html.parser')
+                # Extract text from the page
+                page_text = soup.get_text(separator='\n', strip=True)
+                all_text_data.append(page_text)
+        
+        # Aggregate all text data
+        aggregated_text = "\n\n".join(all_text_data)
+        
+        # Print the aggregated text or save it to a file
+        print("Aggregated Text Data:")
+        print(aggregated_text)  # Print the first 2000 characters for preview
+        with open("aggregated_text_data.txt", "w", encoding="utf-8") as file:
+            file.write(aggregated_text)
+        return aggregated_text
+    except Exception as e:
+        print(f"Error occurred: {e}")
+        return None
+
+def scrapeRawDataFromURL(base_url,endpoints,isFlag = False):
+    try:
+    # Get all endpoints with the base URL
+        print("Base URL:")
+        print("Endpoints:", endpoints)
+        
+        # Prepare the prompt
+        prompt = f"""
+        I have a list of URLs related to {base_url}. I need to identify and return only the high-priority valid URLs from this list. High-priority URLs include main website, portfolio companies, news, press releases, reports, resources, and key contact information. Here is the list of URLs:
+        {endpoints}
+        Please return only the high-priority valid URLs from the provided list. Return a response in list format.
+        The response should be in the following format: [urls]
+        """
+        
+        # Process with OpenAI
+        result = process_with_openai(prompt)
+        if isFlag:
+            return result
         start = result.find("[")
         end = result.find("]")
         result = result[start:end+1]
