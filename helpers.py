@@ -120,6 +120,8 @@ def getFounderLinkedIn(query, location="United States"):
     
     # Make the request to the SERP API
     response = requests.get(url, params=params)
+    print("response")
+    print(response)
     
     # Check if the request was successful
     if response.status_code == 200:
