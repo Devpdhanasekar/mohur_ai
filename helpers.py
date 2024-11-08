@@ -189,7 +189,7 @@ def getGoogleMapData(url):
 
     try:
         print("url",url)
-        api_key = "ed386f4e0d0933422e95e5cc1d36f10646b29ede50a22c28c390a905fc0d1af8"  # Replace with your actual SerpApi key
+        api_key = os.getenv("SERP_API_KEY")  # Replace with your actual SerpApi key
         print(api_key)
         location = url["location"]
         print(location)
