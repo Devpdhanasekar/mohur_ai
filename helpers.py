@@ -19,6 +19,7 @@ from geopy.exc import GeocoderTimedOut, GeocoderServiceError
 from bson.json_util import dumps
 from dotenv import load_dotenv
 import os
+from datetime import datetime, timezone
 load_dotenv()
 tavily = TavilyClient(api_key=os.getenv("TAVILYCLIENT_SECRECTID"))
 openai.api_key = os.getenv("OPEN_AI_APIKEY")
@@ -58,6 +59,7 @@ def scrapDataFromWeb(url_data):
             'no_of_portfolio_companies_invested_in': finalResult.get("No.of Portfoilo Companies Invested in", ""),
             'no_of_exits': finalResult.get("No.of Exits", ""),
             'portfolio_acquisitions': finalResult.get("Portfolio Acquisitions", ""),
+            'no_of_portfolio_acquisitions': finalResult.get("No.of Portfolio Acquisitions", ""),
             'website': website_url,
             'portfolio_unicorns_soonicorns': finalResult.get("Portfolio Unicorns / Soonicorns", ""),
             'portfolio_exits': finalResult.get("Portfolio Exits", ""),
@@ -71,11 +73,15 @@ def scrapDataFromWeb(url_data):
             'linkedin': finalResult.get("LinkedIn", ""),
             'twitter': finalResult.get("Twitter", ""),
             'youtube': finalResult.get("Youtube", ""),
+            'instagram': finalResult.get("Instagram", ""),
             'co_investors': finalResult.get("Co-Investors", ""),
             'founders': finalResult.get("Founders", ""),
             'tags_keywords': finalResult.get("tags", ""),
             'program_link': finalResult.get("program_link", ""),
-            'fund_manager': finalResult.get("fund manager", "")
+            'fund_manager': finalResult.get("fund manager", ""),
+            'aum': finalResult.get("AUM (Doller)", ""),
+            "portfolio_company_urls": finalResult.get("portfolio companies urls", ""),
+            'timestamp': datetime.now(timezone.utc)
         }
 
         inserted_id = collection.insert_one(data).inserted_id
@@ -93,6 +99,12 @@ def scrapDataFromWeb(url_data):
             if "linkedin" in result["url"]:
                 print(result["url"])
                 collection.update_one({'_id': inserted_id}, {'$set': {'linkedin': result["url"]}})
+                break
+        founderInstagramId = tavily_search(url_data["url"]["title"] + " Instagram profile")
+        for result in founderInstagramId["response"]["results"]:
+            if "instagram" in result["url"]:
+                print(result["url"])
+                collection.update_one({'_id': inserted_id}, {'$set': {'instagram': result["url"]}})
                 break
         youtubeResults = tavily_search(url_data["url"]["title"] + " youtube chennal link")
         for result in youtubeResults["response"]["results"]:
@@ -429,6 +441,19 @@ def update_founder_data(payload, content_key):
                         return {"status": "error", "message": "No LinkedIn profile found"}
                 else:
                     return {"status": "error", "message": "Failed to fetch LinkedIn profile"}
+            
+            elif context == "instagram":
+                youtube_result = tavily_search(f'{name} instagram profile link')
+                print(youtube_result)
+                if youtube_result and 'response' in youtube_result:
+                    for result in youtube_result["response"].get("results", []):
+                        if "instagram" in result["url"]:
+                            collection.update_one({'website': base_url}, {'$set': {'instagram': result["url"]}})
+                            break
+                    else:
+                        return {"status": "error", "message": "No instagram channel found"}
+                else:
+                    return {"status": "error", "message": "Failed to fetch instagram channel"}
 
             elif context == "youtube":
                 youtube_result = tavily_search(f'{name} youtube channel link')
@@ -542,12 +567,17 @@ def updateFounderDataManual(payload, content_key):
         return str(error)
 def getInvestmentData():
     try:
+        # Connect to MongoDB
         client = MongoClient('mongodb+srv://devpdhanasekar:VRBpMHku36ashoCe@cluster0.upee9tc.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0')
         db = client['crafy_db']
         collection = db['investment_funds']
-        data = collection.find()
+        
+        # Retrieve data sorted by _id in descending order (most recent first)
+        data = collection.find().sort('_id', -1)
+        
         # Convert the cursor to a list of documents
         data_list = list(data)
+        
         # Convert the list to JSON
         response = dumps(data_list)
         return response
@@ -806,6 +836,7 @@ You are tasked with creating a complete and accurate JSON output based on web-sc
   "No. of Portfolio Companies Invested in": 160,
   "No. of Exits": 39,
   "Portfolio Acquisitions": ["Agara Labs", "Chillr", "Hybrent", "Mettl", "Minjar", "Promptec", "Runnr", "Superset", "Taxi for sure", "Threadsol", "ZipDial", "1click", "Bill Bachao", "Chaitanya", "Framebench", "iService", "Mastree", "MilkBasket", "Nowfloats", "Qubecell", "StrmEasy", "TapChief", "Zenatix", "Adepto", "Clink (Gharpay)", "Fastfox", "Glamrs", "Karmic", "LBB", "MechMocha", "MockBank", "Moneysights", "Patch", "Rolocule", "Valgen Infosys", "We are Holidays"],
+  "No.of Portfolio Acquisitions": 39,
   "Website": "https://blume.vc/",
   "Portfolio Unicorns / Soonicorns": ["Spinny", "Purplle", "slice", "Unacademy"],
   "Portfolio Exits": ["Agara Labs", "Chillr", "E2E Networks", "Hybrent", "Infollion", "Mettl", "Minjar", "Promptec", "Runnr", "Superset", "Taxi for sure", "Threadsol", "Uniqode", "ZipDial", "1click", "Bill Bachao", "Chaitanya", "Framebench", "iService", "Mastree", "MilkBasket", "Nowfloats", "Qubecell", "StrmEasy", "TapChief", "Zenatix", "Adepto", "Clink (Gharpay)", "Fastfox", "Glamrs", "Karmic", "LBB", "MechMocha", "MockBank", "Moneysights", "Patch", "Rolocule", "Valgen Infosys", "We are Holidays"],
@@ -823,7 +854,8 @@ You are tasked with creating a complete and accurate JSON output based on web-sc
   "Instagram": "",
   "Founders": ["Sanjay Nath", "Karthik Reddy"],
   "tags":[],
-  "program link":""
+  "program link":"",
+  "portfolio companies urls":[]
 }}
 </json_template>
 
