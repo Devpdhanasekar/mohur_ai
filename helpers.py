@@ -50,7 +50,7 @@ def scrapDataFromWeb(url_data):
             'fund_name': finalResult.get("Fund Name", url_data["url"]["title"]),
             'brief_description': finalResult.get("Brief Description", ""),
             'hq_location': finalResult.get("HQ Location", ""),
-            'investor_type': finalResult.get("Investor Type",url_data["url"]["type"] if "type" in url_data['url'] else ""),
+            'investor_type': url_data["url"]["type"],
             'equity_debt_fund_category': finalResult.get("Equity / Debt (Fund Category)", ""),
             'stages_of_entry_investment': finalResult.get("Stages of Entry/ Investment", ""),
             'sectors_of_investment': finalResult.get("Sectors of Investment", ""),
@@ -323,111 +323,148 @@ def update_founder_data(payload, content_key):
             if not context or not base_url or not name:
                 return {"status": "error", "message": "Missing required fields: 'context', 'base_url', or 'name'"}
             
-            # For fundsize
-            elif context == "fundsize":
+            # For portfolio_companies
+            elif context == "portfolio_companies":
+                print("Called")
                 prompt = f"""
-                    What is the overall fund size for {name} organisation?
-                    The objective is to return the overall fund size in a clear format.
-                    Example response:
-                    "Fund VI (2021 onwards) - $290M, Size of the Fund: $1.5 to $3M (₹12 to 24 crs), 12-20% stake"
-                """
-                resultData = tavily_search(prompt)
-                if resultData and 'response' in resultData:
-                    fundsize = resultData['response']["results"][0]['content']
-                    collection.update_one({'website': base_url}, {'$set': {'fundsize': fundsize}})
-                else:
-                    return {"status": "error", "message": "Failed to fetch fundsize"}
+                    Which are portfolio companies of {name}, Please note provide the response without any description or comments and seperate the companies by comma. Provide whatever the portfolio information is available."""
+                response = aiChatbot(prompt, isCurrent = True)
+                print(response["assistant"])
+                collection.update_one({'website': base_url}, {'$set': {'portfolio_companies': response["assistant"]}})
 
-            # For deals_in_last_12_months
-            elif context == "deals_in_last_12_months":
-                prompt = f"""
-                    What are the funding deals made in the last 12 months by {name} organisation?
-                    The objective is to return the deals in a list format.
-                    Example response:
-                    "Deals in last 12 months: Atomicwork, Flash, DPDzero, Zivy, PicoXpress, Bambrew, SuperK, Optimo Capital, Interview Kickstart"
-                """
-                resultData = tavily_search(prompt)
-                if resultData and 'response' in resultData:
-                    deals = resultData['response']["results"][0]['content']
-                    collection.update_one({'website': base_url}, {'$set': {'deals_in_last_12_months': deals}})
-                else:
-                    return {"status": "error", "message": "Failed to fetch last deals"}
-
-            # For team_size
-            elif context == "team_size":
-                prompt = f"""
-                    What is the team size of {name} organisation?
-                    The objective is to return the team size as a single number.
-                    Example response:
-                    "Team Size: 46"
-                """
-                resultData = tavily_search(prompt)
-                if resultData and 'response' in resultData:
-                    team_size = resultData['response']["results"][0]['content']
-                    collection.update_one({'website': base_url}, {'$set': {'team_size': team_size}})
-                else:
-                    return {"status": "error", "message": "Failed to fetch team size"}
 
             # For equity_or_debt
             elif context == "equity_debt_fund_category":
+                print("Called")
                 prompt = f"""
-                    Is {name} organisation focused on equity or debt in the investment point of view?
-                    The objective is to return 'Equity' or 'Debt' based on their focus.
-                    Example response:
-                    "Equity"
-                """
-                resultData = tavily_search(prompt)
-                if resultData and 'response' in resultData:
-                    equity_or_debt = resultData['response']["results"][0]['content']
-                    collection.update_one({'website': base_url}, {'$set': {'equity_debt_fund_category': equity_or_debt}})
-                else:
-                    return {"status": "error", "message": "Failed to fetch equity_debt_fund_category"}
+                    Is {name} equity or debt fund? Provide the response without any description or comments."""
+                response = aiChatbot(prompt, isCurrent = True)
+                print(response["assistant"])
+                collection.update_one({'website': base_url}, {'$set': {'equity_debt_fund_category': response["assistant"]}})
 
-            # For sector_of_investment
+            # For stages_of_entry_investment
+            elif context == "stages_of_entry_investment":
+                print("Called")
+                prompt = f"""
+                    At what stages of the startup does {name} invest in? Provide the response without any description or comments and please make sure stages are seperated by comma."""
+                response = aiChatbot(prompt, isCurrent = True)
+                print(response["assistant"])
+                collection.update_one({'website': base_url}, {'$set': {'stages_of_entry_investment': response["assistant"]}})
+            
+            # For sectors_of_investment
             elif context == "sectors_of_investment":
+                print("Called")
                 prompt = f"""
-                    What are the sectors of investment for {name} organisation?
-                    The objective of you is to return the sectors of investment in a clear and concise format.
-                    Example response: 
-                    "Healthcare, FinTech, SaaS, Deep Tech, Media, B2B Services, Consumer Tech, AI Tech, etc."
-                """
-                resultData = tavily_search(prompt)
-                print(resultData)
-                if resultData and 'response' in resultData:
-                    sectors = resultData['response']["results"][0]['content']
-                    collection.update_one({'website': base_url}, {'$set': {'sectors_of_investment': sectors}})
-                else:
-                    return {"status": "error", "message": "Failed to fetch sector_of_investment"}
-
+                    At what stages of the startup does {name} invest in? Provide the response without any description or comments and please make sure sectors are seperated by comma."""
+                response = aiChatbot(prompt, isCurrent = True)
+                print(response["assistant"])
+                collection.update_one({'website': base_url}, {'$set': {'sectors_of_investment': response["assistant"]}})
+            
+            # For geographies_invested_in
+            elif context == "geographies_invested_in":
+                print("Called")
+                prompt = f"""
+                    Which are headquarter Indian cities or towns or villages of the portfolio companies of {name}? Provide the response without any description or comments. Provide whatever information is available."""
+                response = aiChatbot(prompt, isCurrent = True)
+                print(response["assistant"])
+                collection.update_one({'website': base_url}, {'$set': {'geographies_invested_in': response["assistant"]}})
+            
+            # For no_of_portfolio_companies_invested_in
+            elif context == "no_of_portfolio_companies_invested_in":
+                print("Called")
+                prompt = f"""
+                    How many portfolio companies, exits, unicorns, soonicorns and acquiaitions does {name} have? Provide the response without any description or comments. Provide whatever information is available."""
+                response = aiChatbot(prompt, isCurrent = True)
+                print(response["assistant"])
+                collection.update_one({'website': base_url}, {'$set': {'no_of_portfolio_companies_invested_in': response["assistant"]}})
+            
+            # For portfolio_acquisitions
+            elif context == "portfolio_acquisitions":
+                print("Called")
+                prompt = f"""
+                    Which are the portfolio companies of {name} have been acquired? Provide the response without any description or comments. Provide whatever information is available."""
+                response = aiChatbot(prompt, isCurrent = True)
+                print(response["assistant"])
+                collection.update_one({'website': base_url}, {'$set': {'portfolio_acquisitions': response["assistant"]}})
+            
+            # For portfolio_unicorns_or_soonicorns
+            elif context == "portfolio_unicorns_or_soonicorns":
+                print("Called")
+                prompt = f"""
+                    Which are the portfolio unicorns or soonicorns of {name}? Provide the response without any description or comments. Provide whatever information is available."""
+                response = aiChatbot(prompt, isCurrent = True)
+                print(response["assistant"])
+                collection.update_one({'website': base_url}, {'$set': {'portfolio_unicorns_or_soonicorns': response["assistant"]}})
+            
+            # For portfolio_exits
+            elif context == "portfolio_exits":
+                print("Called")
+                prompt = f"""
+                    Which are the portfolio Exits of {name}? Provide the response without any description or comments make sure the portfolio exits are seperated by comma. Provide whatever information is available."""
+                response = aiChatbot(prompt, isCurrent = True)
+                print(response["assistant"])
+                collection.update_one({'website': base_url}, {'$set': {'portfolio_exits': response["assistant"]}})
+            
+            # For operating_status_active_deadpooled_etc
+            elif context == "operating_status_active_deadpooled_etc":
+                print("Called")
+                prompt = f"""
+                    Is {name} active or dead fund? Provide the response without any description or comments."""
+                response = aiChatbot(prompt, isCurrent = True)
+                print(response["assistant"])
+                collection.update_one({'website': base_url}, {'$set': {'operating_status_active_deadpooled_etc': response["assistant"]}})
+            
+            # For deals_in_last_12_months
+            elif context == "deals_in_last_12_months":
+                print("Called")
+                prompt = f"""
+                    Which are the portfolio companies that {name} has invested in the last 12 months? Provide the response without any description or comments. Provide whatever information is available."""
+                response = aiChatbot(prompt, isCurrent = True)
+                print(response["assistant"])
+                collection.update_one({'website': base_url}, {'$set': {'deals_in_last_12_months': response["assistant"]}})
+            
+            # For aum
+            elif context == "aum":
+                print("Called")
+                prompt = f"""
+                    What is the fund size and AUM of {name}? Provide the response without any description or comments."""
+                response = aiChatbot(prompt, isCurrent = True)
+                print(response["assistant"])
+                collection.update_one({'website': base_url}, {'$set': {'aum': response["assistant"]}})
+            
             # For funded_year
-            elif context == "funded_year":
+            elif context == "founded_year":
+                print("Called")
                 prompt = f"""
-                    When was {name} organisation founded?
-                    The objective of you is to return the founding year in a concise manner.
-                    Example response: 
-                    "2011"
-                """
-                resultData = tavily_search(prompt)
-                if resultData and 'response' in resultData:
-                    funded_year = resultData['response']["results"][0]['content']
-                    collection.update_one({'website': base_url}, {'$set': {'funded_year': funded_year}})
-                else:
-                    return {"status": "error", "message": "Failed to fetch funded_year"}
-
-            # For operating_status
-            elif context == "operating_status":
+                    In which year was {name} founded? Provide the response without any description or comments."""
+                response = aiChatbot(prompt, isCurrent = True)
+                print(response["assistant"])
+                collection.update_one({'website': base_url}, {'$set': {'founded_year': response["assistant"]}})
+            # For team_size
+            elif context == "team_size":
+                print("Called")
                 prompt = f"""
-                    What is the operating status of {name} organisation?
-                    The objective of you is to return the operating status clearly.
-                    Example response: 
-                    "Active" or "Inactive"
-                """
-                resultData = tavily_search(prompt)
-                if resultData and 'response' in resultData:
-                    operating_status = resultData['response']["results"][0]['content']
-                    collection.update_one({'website': base_url}, {'$set': {'operating_status': operating_status}})
-                else:
-                    return {"status": "error", "message": "Failed to fetch operating_status"}
+                    What is the team size of {name}? Provide the response without any description or comments."""
+                response = aiChatbot(prompt, isCurrent = True)
+                print(response["assistant"])
+                collection.update_one({'website': base_url}, {'$set': {'team_size': response["assistant"]}})
+            # For group_email_id_email_id
+            elif context == "group_email_id_email_id":
+                print("Called")
+                prompt = f"""
+                    What is the contact email ID and contact phone number of {name}? Provide the response without any description or comments. Provide whatever information is available."""
+                response = aiChatbot(prompt, isCurrent = True)
+                print(response["assistant"])
+                collection.update_one({'website': base_url}, {'$set': {'group_email_id_email_id': response["assistant"]}})
+            
+            # For founders
+            elif context == "founders":
+                print("Called")
+                prompt = f"""
+                    Who are the founders of {name}? Provide the response without any description or comments. Provide whatever information is available."""
+                response = aiChatbot(prompt, isCurrent = True)
+                print(response["assistant"])
+                collection.update_one({'website': base_url}, {'$set': {'founders': response["assistant"]}})
 
 
             elif context == "linkedin":
@@ -748,32 +785,61 @@ import anthropic
 import os
 
 
-def aiChatbot(raw_data):
-    # Initialize the Claude client using the API key
+def aiChatbot(raw_data, isCurrent=False):
+    print("Chatbot invoked")
+    
+    # Initialize the Claude client
     client = anthropic.Anthropic(
-        api_key=os.getenv("ANTHROPIC_APIKEY")  # Replace with your actual API key
+        api_key=os.getenv("ANTHROPIC_APIKEY")  # Ensure API key is correctly set
     )
 
-    # Prepare the conversation payload using the Messages API format
-    messages = raw_data
-    content = messages[len(messages)-1]["content"]
-    tavily_result = tavily_qna_search(content)
-    print(tavily_result)
-
     try:
-        # Send the conversation to Claude's Messages API
-        response = client.messages.create(
-            model="claude-3-5-sonnet-20240620",  # The correct model for the Messages API
-            messages=messages,
-            max_tokens=4096,
-            stop_sequences=[anthropic.HUMAN_PROMPT],  # Optional, customize if needed
-        )
-        print(response.content[0].text)
-        return {"assistant":response.content[0].text+" "+tavily_result["response"]}
-    
+        if isCurrent:
+            messages = [{"role":"user","content":raw_data}]
+            content = raw_data
+            tavily_result = tavily_qna_search(content)
+            print(tavily_result)
+
+            try:
+                # Send the conversation to Claude's Messages API
+                response = client.messages.create(
+                    model="claude-3-5-sonnet-20240620",  # The correct model for the Messages API
+                    messages=messages,
+                    max_tokens=4096,
+                    stop_sequences=[anthropic.HUMAN_PROMPT],  # Optional, customize if needed
+                )
+                print(response.content[0].text)
+                return {"assistant":response.content[0].text+" "+tavily_result["response"]}
+            
+            except Exception as e:
+                # Handle any exceptions that occur during the API call
+                print(f"Error communicating with Claude: {e}")
+                return "Sorry, there was an issue processing your request."  # raw_data expected to be pre-formatted
+        else:
+            messages = raw_data
+            content = messages[len(messages)-1]["content"]
+            tavily_result = tavily_qna_search(content)
+            print(tavily_result)
+
+            try:
+                # Send the conversation to Claude's Messages API
+                response = client.messages.create(
+                    model="claude-3-5-sonnet-20240620",  # The correct model for the Messages API
+                    messages=messages,
+                    max_tokens=4096,
+                    stop_sequences=[anthropic.HUMAN_PROMPT],  # Optional, customize if needed
+                )
+                print(response.content[0].text)
+                return {"assistant":response.content[0].text+" "+tavily_result["response"]}
+            
+            except Exception as e:
+                # Handle any exceptions that occur during the API call
+                print(f"Error communicating with Claude: {e}")
+                return "Sorry, there was an issue processing your request."
+
     except Exception as e:
-        # Handle any exceptions that occur during the API call
-        print(f"Error communicating with Claude: {e}")
+        # Catch and log any exceptions
+        print(f"Error communicating with Claude or Tavily: {e}")
         return "Sorry, there was an issue processing your request."
     
 def claudeCommunication(raw_data):
@@ -887,7 +953,7 @@ You are tasked with creating a complete and accurate JSON output based on web-sc
 7. Final check:
    - Review your JSON output to ensure all keys are filled.
    - Verify that the information accurately represents the data from the web_scrape.
-   - Make sure the JSON is properly formatted and valid.
+   - Make sure the JSON is properly formatted and valid and when ever you need to seperate the data for difference use comma.
 
 Provide your complete JSON output inside <json_output> tags. Do not include any explanations or comments outside of these tags.
 """
