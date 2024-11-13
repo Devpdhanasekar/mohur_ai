@@ -332,7 +332,13 @@ def update_founder_data(payload, content_key):
                 print(response["assistant"])
                 collection.update_one({'website': base_url}, {'$set': {'portfolio_companies': response["assistant"]}})
 
-
+            # elif context == "size_of_the_fund":
+            #     print("Called")
+            #     prompt = f"""
+            #         Which are portfolio companies of {name}, Please note provide the response without any description or comments and seperate the companies by comma. Provide whatever the portfolio information is available."""
+            #     response = aiChatbot(prompt, isCurrent = True)
+            #     print(response["assistant"])
+            #     collection.update_one({'website': base_url}, {'$set': {'portfolio_companies': response["assistant"]}})
             # For equity_or_debt
             elif context == "equity_debt_fund_category":
                 print("Called")
@@ -677,6 +683,40 @@ def scrape_text_from_urls(base_url):
         prompt = f"""
         I have a list of URLs related to {base_url}. I need to identify and return only the high-priority valid URLs from this list. High-priority URLs include main website, portfolio companies, news, press releases, reports, resources, and key contact information. Here is the list of URLs:
         {endpoints}
+        Must note i need to scrape these 
+  "Fund Name",
+  "Brief Description",
+  "HQ Location",
+  "Investor Type",
+  "Equity / Debt (Fund Category)",
+  "Stages of Entry/ Investment",
+  "Sectors of Investment",
+  "Geographies Invested In",
+  "Portfolio Companies",
+  "No. of Portfolio Companies Invested in",
+  "No. of Exits",
+  "Portfolio Acquisitions",
+  "No.of Portfolio Acquisitions",
+  "Website",
+  "Portfolio Unicorns / Soonicorns",
+  "Portfolio Exits",
+  "Operating Status",
+  "Deals in last 12 months",
+  "AUM (Doller)",
+  "Size of the Fund",
+  "Founded Year",
+  "Team Size",
+  "Group Email ID/ Email ID",
+  "Contact Number",
+  "LinkedIn",
+  "Twitter (X)",
+  "Youtube",
+  "Instagram",
+  "Founders",
+  "tags",
+  "program link",
+  "portfolio companies urls"
+data from the end points so give the hight posibility enpoints to scrape the data to get those data.
         Please return only the high-priority valid URLs from the provided list. Return a response in list format.
         The response should be in the following format: [urls]
         """
@@ -932,6 +972,7 @@ You are tasked with creating a complete and accurate JSON output based on web-sc
 
 4. Fill the JSON template:
    - For each key in the JSON template, find the corresponding information in the web_scrape data.
+   - Must follow stages of investment,sector of investment,portfolio companies,portfolio aquisitions, portfolio unicorn/soonicorns, portfolio exits those result data's are seperated by comma. 
    - If you find an exact match or highly relevant information, use it to fill the key.
    - If the information is not explicitly stated but can be reasonably inferred, make a logical inference and use it.
    - Ensure that all keys are filled with accurate and relevant information.
@@ -953,7 +994,7 @@ You are tasked with creating a complete and accurate JSON output based on web-sc
 7. Final check:
    - Review your JSON output to ensure all keys are filled.
    - Verify that the information accurately represents the data from the web_scrape.
-   - Make sure the JSON is properly formatted and valid and when ever you need to seperate the data for difference use comma.
+   - Make sure the JSON is properly formatted and valid.
 
 Provide your complete JSON output inside <json_output> tags. Do not include any explanations or comments outside of these tags.
 """
