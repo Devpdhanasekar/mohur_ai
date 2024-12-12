@@ -887,6 +887,9 @@ def claudeCommunication(raw_data):
         # Use an environment variable for the API key
         api_key=os.getenv("ANTHROPIC_APIKEY")
     )
+    max_data_length = 50000  # Adjust as needed
+    if len(raw_data) > max_data_length:
+        raw_data = raw_data[:max_data_length]
     
     # Use triple quotes for the prompt to avoid formatting issues
     prompt = f"""
