@@ -86,7 +86,7 @@ async def scrapDataFromWeb(url_data):
 
         inserted_id = await collection.insert_one(data).inserted_id
         
-        fundSize = await tavily_search(url_data["url"]["title"] + " twitter profile")
+        fundSize =  tavily_search(url_data["url"]["title"] + " twitter profile")
         results = fundSize["response"]["results"]
         print(results)
         for result in results:
@@ -94,19 +94,19 @@ async def scrapDataFromWeb(url_data):
                 print(result["url"])
                 await collection.update_one({'_id': inserted_id}, {'$set': {'twitter': result["url"]}})
 
-        founderLinkedIn = await tavily_search(url_data["url"]["title"] + " linkedin profile")
+        founderLinkedIn =  tavily_search(url_data["url"]["title"] + " linkedin profile")
         for result in founderLinkedIn["response"]["results"]:
             if "linkedin" in result["url"]:
                 print(result["url"])
                 await collection.update_one({'_id': inserted_id}, {'$set': {'linkedin': result["url"]}})
                 break
-        founderInstagramId = await tavily_search(url_data["url"]["title"] + " Instagram profile")
+        founderInstagramId =  tavily_search(url_data["url"]["title"] + " Instagram profile")
         for result in founderInstagramId["response"]["results"]:
             if "instagram" in result["url"]:
                 print(result["url"])
                 await collection.update_one({'_id': inserted_id}, {'$set': {'instagram': result["url"]}})
                 break
-        youtubeResults = await tavily_search(url_data["url"]["title"] + " youtube chennal link")
+        youtubeResults = tavily_search(url_data["url"]["title"] + " youtube chennal link")
         for result in youtubeResults["response"]["results"]:
             if "youtube" in result["url"]:
                 print(result["url"])
@@ -672,7 +672,7 @@ def fetch_page_content(url):
         print(f"Error fetching {url}: {e}")
         return None
 
-def scrape_text_from_urls(base_url):
+async def scrape_text_from_urls(base_url):
     try:
     # Get all endpoints with the base URL
         print("Base URL:")
@@ -882,7 +882,7 @@ def aiChatbot(raw_data, isCurrent=False):
         print(f"Error communicating with Claude or Tavily: {e}")
         return "Sorry, there was an issue processing your request."
     
-def claudeCommunication(raw_data):
+async def claudeCommunication(raw_data):
     client = anthropic.Anthropic(
         # Use an environment variable for the API key
         api_key=os.getenv("ANTHROPIC_APIKEY")
