@@ -1,7 +1,7 @@
 from helpers import scrapDataFromWeb,getGoogleMapData,update_founder_data, getInvestmentData,updateFounderDataManual,aiChatbot,get_all_endpoints_with_base,scrapeRawDataFromURL
-def initialDataScrapeFromAI(payloadData):
+async def initialDataScrapeFromAI(payloadData):
     try:
-        response = scrapDataFromWeb(payloadData)
+        response = await scrapDataFromWeb(payloadData)
         return response
     except Exception as error:
         print("Error while scraping data from AI: ", error)
