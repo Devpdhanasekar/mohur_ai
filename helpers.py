@@ -1006,6 +1006,7 @@ Provide your complete JSON output inside <json_output> tags. Do not include any 
         model="claude-3-5-sonnet-20240620",
         max_tokens=4096,
         temperature=0,
+        timeout=30,
         messages=[
             {
                 "role": "user",
