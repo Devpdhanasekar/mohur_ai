@@ -23,7 +23,7 @@ from datetime import datetime, timezone
 load_dotenv()
 tavily = TavilyClient(api_key=os.getenv("TAVILYCLIENT_SECRECTID"))
 openai.api_key = os.getenv("OPEN_AI_APIKEY")
-def scrapDataFromWeb(url_data):
+async def scrapDataFromWeb(url_data):
     try:
         # Connect to MongoDB
         client = MongoClient('mongodb+srv://devpdhanasekar:VRBpMHku36ashoCe@cluster0.upee9tc.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0')
@@ -36,14 +36,14 @@ def scrapDataFromWeb(url_data):
         website_url = url_data["url"]["website"]
         print(website_url)
         print("Hello")
-        isAvailable = collection.find_one({"website": website_url})
+        isAvailable = await collection.find_one({"website": website_url})
         
         if isAvailable:
             return {"message": "Data already exists"}
 
-        raw_data = scrape_text_from_urls(website_url)
+        raw_data = await scrape_text_from_urls(website_url)
         tavily_search_result = tavily_qna_search(url_data["url"]["title"] + "company details which contains the social media links and and fund details, investors details,portfolio companies")
-        finalResult = claudeCommunication(raw_data+tavily_search_result["response"])
+        finalResult = await claudeCommunication(raw_data+tavily_search_result["response"])
         finalResult = json.loads(finalResult)
 
         data = {
@@ -84,33 +84,33 @@ def scrapDataFromWeb(url_data):
             'timestamp': datetime.now(timezone.utc)
         }
 
-        inserted_id = collection.insert_one(data).inserted_id
+        inserted_id = await collection.insert_one(data).inserted_id
         
-        fundSize = tavily_search(url_data["url"]["title"] + " twitter profile")
+        fundSize = await tavily_search(url_data["url"]["title"] + " twitter profile")
         results = fundSize["response"]["results"]
         print(results)
         for result in results:
             if "twitter" in result["url"]:
                 print(result["url"])
-                collection.update_one({'_id': inserted_id}, {'$set': {'twitter': result["url"]}})
+                await collection.update_one({'_id': inserted_id}, {'$set': {'twitter': result["url"]}})
 
-        founderLinkedIn = tavily_search(url_data["url"]["title"] + " linkedin profile")
+        founderLinkedIn = await tavily_search(url_data["url"]["title"] + " linkedin profile")
         for result in founderLinkedIn["response"]["results"]:
             if "linkedin" in result["url"]:
                 print(result["url"])
-                collection.update_one({'_id': inserted_id}, {'$set': {'linkedin': result["url"]}})
+                await collection.update_one({'_id': inserted_id}, {'$set': {'linkedin': result["url"]}})
                 break
-        founderInstagramId = tavily_search(url_data["url"]["title"] + " Instagram profile")
+        founderInstagramId = await tavily_search(url_data["url"]["title"] + " Instagram profile")
         for result in founderInstagramId["response"]["results"]:
             if "instagram" in result["url"]:
                 print(result["url"])
-                collection.update_one({'_id': inserted_id}, {'$set': {'instagram': result["url"]}})
+                await collection.update_one({'_id': inserted_id}, {'$set': {'instagram': result["url"]}})
                 break
-        youtubeResults = tavily_search(url_data["url"]["title"] + " youtube chennal link")
+        youtubeResults = await tavily_search(url_data["url"]["title"] + " youtube chennal link")
         for result in youtubeResults["response"]["results"]:
             if "youtube" in result["url"]:
                 print(result["url"])
-                collection.update_one({'_id': inserted_id}, {'$set': {'youtube': result["url"]}})
+                await collection.update_one({'_id': inserted_id}, {'$set': {'youtube': result["url"]}})
                 break
         return jsonify({'inserted_id': str(inserted_id)})
 
