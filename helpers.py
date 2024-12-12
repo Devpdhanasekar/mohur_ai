@@ -41,9 +41,9 @@ async def scrapDataFromWeb(url_data):
         if isAvailable:
             return {"message": "Data already exists"}
 
-        raw_data = await scrape_text_from_urls(website_url)
+        raw_data =  scrape_text_from_urls(website_url)
         tavily_search_result = tavily_qna_search(url_data["url"]["title"] + "company details which contains the social media links and and fund details, investors details,portfolio companies")
-        finalResult = await claudeCommunication(raw_data+tavily_search_result["response"])
+        finalResult =  claudeCommunication(raw_data+tavily_search_result["response"])
         finalResult = json.loads(finalResult)
 
         data = {
@@ -672,7 +672,7 @@ def fetch_page_content(url):
         print(f"Error fetching {url}: {e}")
         return None
 
-async def scrape_text_from_urls(base_url):
+def scrape_text_from_urls(base_url):
     try:
     # Get all endpoints with the base URL
         print("Base URL:")
@@ -882,7 +882,7 @@ def aiChatbot(raw_data, isCurrent=False):
         print(f"Error communicating with Claude or Tavily: {e}")
         return "Sorry, there was an issue processing your request."
     
-async def claudeCommunication(raw_data):
+def claudeCommunication(raw_data):
     client = anthropic.Anthropic(
         # Use an environment variable for the API key
         api_key=os.getenv("ANTHROPIC_APIKEY")
