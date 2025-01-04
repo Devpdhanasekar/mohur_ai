@@ -62,6 +62,7 @@ def scrapDataFromWeb(url_data):
             'no_of_portfolio_acquisitions': finalResult.get("No.of Portfolio Acquisitions", ""),
             'website': website_url,
             'portfolio_unicorns_soonicorns': finalResult.get("Portfolio Unicorns / Soonicorns", ""),
+            'no_of_portfolio_unicorns_soonicorns': finalResult.get("No.of Portfolio Unicorns / Soonicorns", ""),
             'portfolio_exits': finalResult.get("Portfolio Exits", ""),
             'operating_status_active_deadpooled_etc': finalResult.get("Operating Status (Active/ Deadpooled/ etc)", ""),
             'deals_in_last_12_months': finalResult.get("Deals in last 12 months", ""),
@@ -79,6 +80,11 @@ def scrapDataFromWeb(url_data):
             'tags_keywords': finalResult.get("tags", ""),
             'program_link': finalResult.get("program_link", ""),
             'fund_manager': finalResult.get("fund manager", ""),
+            "objective": finalResult.get("Objective", ""),
+            "features":finalResult.get("Features",""),
+            "benefits": finalResult.get("Benefits",""),
+            "eligibility": finalResult.get("Eligibility",""),
+            "application_process": finalResult.get("Application Process",""),
             'aum': finalResult.get("AUM (Doller)", ""),
             "portfolio_company_urls": finalResult.get("portfolio companies urls", ""),
             'timestamp': datetime.now(timezone.utc)
@@ -361,7 +367,7 @@ def update_founder_data(payload, content_key):
             elif context == "sectors_of_investment":
                 print("Called")
                 prompt = f"""
-                    At what stages of the startup does {name} invest in? Provide the response without any description or comments and please make sure sectors are seperated by comma."""
+                    At which sectors does {name} invest in? Provide the response without any description or comments and please make sure sectors are seperated by comma."""
                 response = aiChatbot(prompt, isCurrent = True)
                 print(response["assistant"])
                 collection.update_one({'website': base_url}, {'$set': {'sectors_of_investment': response["assistant"]}})
@@ -474,16 +480,12 @@ def update_founder_data(payload, content_key):
 
 
             elif context == "linkedin":
-                linkedin_result = tavily_search(f'{name} linkedin profile')
-                if linkedin_result and 'response' in linkedin_result:
-                    for result in linkedin_result["response"].get("results", []):
-                        if "linkedin" in result["url"]:
-                            collection.update_one({'website': base_url}, {'$set': {'linkedin': result["url"]}})
-                            break
-                    else:
-                        return {"status": "error", "message": "No LinkedIn profile found"}
-                else:
-                    return {"status": "error", "message": "Failed to fetch LinkedIn profile"}
+                print("Called")
+                prompt = f"""
+                    What are the social media links for {name}? Provide the response without any description or comments. Provide whatever information is available."""
+                response = aiChatbot(prompt, isCurrent = True)
+                print(response["assistant"])
+                collection.update_one({'website': base_url}, {'$set': {'linkedin': response["assistant"]}})
             
             elif context == "instagram":
                 youtube_result = tavily_search(f'{name} instagram profile link')
@@ -949,6 +951,7 @@ You are tasked with creating a complete and accurate JSON output based on web-sc
   "Website": "https://blume.vc/",
   "Portfolio Unicorns / Soonicorns": ["Spinny", "Purplle", "slice", "Unacademy"],
   "Portfolio Exits": ["Agara Labs", "Chillr", "E2E Networks", "Hybrent", "Infollion", "Mettl", "Minjar", "Promptec", "Runnr", "Superset", "Taxi for sure", "Threadsol", "Uniqode", "ZipDial", "1click", "Bill Bachao", "Chaitanya", "Framebench", "iService", "Mastree", "MilkBasket", "Nowfloats", "Qubecell", "StrmEasy", "TapChief", "Zenatix", "Adepto", "Clink (Gharpay)", "Fastfox", "Glamrs", "Karmic", "LBB", "MechMocha", "MockBank", "Moneysights", "Patch", "Rolocule", "Valgen Infosys", "We are Holidays"],
+  "No.of Portfolio Unicorns / Soonicorns":30,
   "Operating Status": "Active",
   "Deals in last 12 months": ["Atomicwork", "Flash", "DPDzero", "Zivy", "PicoXpress", "Bambrew", "SuperK", "Optimo Capital", "Interview Kickstart"],
   "AUM (Doller)": "Fund VI (2021 onwards) - $290M",
@@ -964,7 +967,16 @@ You are tasked with creating a complete and accurate JSON output based on web-sc
   "Founders": ["Sanjay Nath", "Karthik Reddy"],
   "tags":[],
   "program link":"",
-  "portfolio companies urls":[]
+  "% Portfolio in Tier 2+":"22%",
+  "Objective":"Startup India Seed Fund Scheme (SISFS) aims to provide financial assistance to startups for proof of concept, prototype development, product trials, market-entry, and commercialization. This would enable these startups to graduate to a level where they will be able to raise investments from angel investors or venture capitalists or seek loans from commercial banks or financial institutions.",
+  "Features":"Year-round Call for Applications for Incubators and Startups,Sector-agnostic,No mandatory physical incubation,PAN-India startup programme,Startups can apply to 3 incubators simultaneously",
+  "Benefits":"Up to ₹20 Lakhs as a grant for validation of Proof of Concept, prototype development, or product trials. The grant shall be disbursed in milestone-based installments. These milestones can be related to the development of prototypes, product testing, building a product ready for market launch, etc.Up to ₹50 Lakhs of investment for market entry, commercialization, or scaling up through convertible debentures or debt or debt-linked instruments.Seed funds shall strictly not be used by startups for the creation of any facilities and shall be utilized for the purpose it has been granted for.",
+  "Eligibility":"A startup, recognized by DPIIT, incorporated not more than 2 years ago at the time of application.Startups must have a business idea to develop a product or a service with market fit, viable commercialization, and scope of scaling.A startup should be using technology in its core product or service, or business model, or distribution model, or methodology to solve the problem being targeted",
+  "Application Process":"Apply online",
+  "portfolio companies urls":[],
+  "fund manager": "Sanjay Nath, Karthik Reddy",
+  "Co-Investors":"Akash Gupta"
+
 }}
 </json_template>
 
