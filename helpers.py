@@ -965,7 +965,7 @@ You are tasked with creating a complete and accurate JSON output based on web-sc
   "Youtube": "https://www.youtube.com/channel/UCMVGOgVL6OJyoxWFN1pmLCw",
   "Instagram": "",
   "Founders": ["Sanjay Nath", "Karthik Reddy"],
-  "tags":[],
+  "tags":[keywords and tages related to the fund],
   "program link":"",
   "% Portfolio in Tier 2+":"22%",
   "Objective":"Startup India Seed Fund Scheme (SISFS) aims to provide financial assistance to startups for proof of concept, prototype development, product trials, market-entry, and commercialization. This would enable these startups to graduate to a level where they will be able to raise investments from angel investors or venture capitalists or seek loans from commercial banks or financial institutions.",
